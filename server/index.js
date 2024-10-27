@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { typeDefs } from './schema.js';
 import { resolvers } from './resolvers.js';
 import cors from 'cors';
+import { getUser } from './utils/auth.js';
 
 dotenv.config();
 
@@ -19,11 +20,11 @@ mongoose.connect(process.env.MONGODB_URI, {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 })
-.then(() => console.log('✅ Connected to MongoDB'))
-.catch(err => {
-  console.error('❌ MongoDB connection error:', err);
-  process.exit(1);
-});
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 // Handle MongoDB connection events
 mongoose.connection.on('error', err => {
@@ -37,6 +38,7 @@ mongoose.connection.on('disconnected', () => {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: ({ req }) => ({ req }),
   formatError: (error) => {
     console.error('GraphQL Error:', error);
     return error;
